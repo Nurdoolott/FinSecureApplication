@@ -1,0 +1,11 @@
+# env
+.env
+server/.env
+
+# node
+node_modules/
+server/node_modules/
+
+# android
+.idea/
+*.iml
