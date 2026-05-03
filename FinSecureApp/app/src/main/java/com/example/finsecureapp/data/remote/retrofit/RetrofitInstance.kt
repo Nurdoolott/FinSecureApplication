@@ -49,4 +49,5 @@ object RetrofitInstance {
     val userApi: UserApi by lazy {
         retrofit.create(UserApi::class.java)
     }
+
 }

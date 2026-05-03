@@ -21,10 +21,14 @@ interface AuthApi {
         @Body request: StartRegisterRequest
     ): Response<StartRegisterResponse>
 
+    @POST("api/auth/check-phone")
+    suspend fun checkPhone(@Body body: Map<String, String>): Response<Unit>
+
     @POST("api/auth/verify-register")
     suspend fun verifyRegister(
         @Body request: VerifyRegisterRequest
     ): Response<VerifyRegisterResponse>
+
 
     @POST("api/auth/login")
     suspend fun login(

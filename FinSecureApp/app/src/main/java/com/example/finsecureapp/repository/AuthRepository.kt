@@ -30,6 +30,21 @@ class AuthRepository {
         PhoneAuthProvider.verifyPhoneNumber(options)
     }
 
+    suspend fun checkPhone(phoneNumber: String): Resource<Unit> {
+        return try {
+            val response = RetrofitInstance.authApi.checkPhone(
+                mapOf("phoneNumber" to phoneNumber)
+            )
+            if (response.isSuccessful) {
+                Resource.Success(Unit)
+            } else {
+                Resource.Error(response.errorBody()?.string() ?: "Phone already registered")
+            }
+        } catch (e: Exception) {
+            Resource.Error(e.message ?: "Unknown error")
+        }
+    }
+
     // Подтвердить OTP код и получить Firebase токен
     suspend fun verifyOtpAndGetToken(
         verificationId: String,

@@ -42,20 +42,27 @@ class AuthViewModel(
     // Шаг 1 — отправить OTP
     fun sendOtp(phoneNumber: String, activity: Activity) {
         _otpSentState.value = Resource.Loading
-        repository.sendOtp(phoneNumber, activity,
-            object : PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
-                override fun onVerificationCompleted(credential: com.google.firebase.auth.PhoneAuthCredential) {
-                    // Авто-верификация (на некоторых устройствах)
-                }
-                override fun onVerificationFailed(e: com.google.firebase.FirebaseException) {
-                    _otpSentState.value = Resource.Error(e.message ?: "OTP send failed")
-                }
-                override fun onCodeSent(id: String, token: PhoneAuthProvider.ForceResendingToken) {
-                    verificationId = id
-                    _otpSentState.value = Resource.Success("OTP sent")
-                }
+        viewModelScope.launch {
+            // Сначала проверяем номер на бэкенде
+            val checkResult = repository.checkPhone(phoneNumber)
+            if (checkResult is Resource.Error) {
+                _otpSentState.value = Resource.Error(checkResult.message)
+                return@launch
             }
-        )
+            // Только потом отправляем OTP
+            repository.sendOtp(phoneNumber, activity,
+                object : PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
+                    override fun onVerificationCompleted(credential: com.google.firebase.auth.PhoneAuthCredential) {}
+                    override fun onVerificationFailed(e: com.google.firebase.FirebaseException) {
+                        _otpSentState.value = Resource.Error(e.message ?: "OTP send failed")
+                    }
+                    override fun onCodeSent(id: String, token: PhoneAuthProvider.ForceResendingToken) {
+                        verificationId = id
+                        _otpSentState.value = Resource.Success("OTP sent")
+                    }
+                }
+            )
+        }
     }
 
     // Шаг 2 — подтвердить OTP и зарегистрировать

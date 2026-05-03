@@ -60,6 +60,28 @@ export const startRegister = async (req, res) => {
   }
 };
 
+export const checkPhone = async (req, res) => {
+  try {
+    const { phoneNumber } = req.body;
+    if (!phoneNumber) {
+      return res.status(400).json({ message: 'Phone number is required' });
+    }
+
+    const existingUser = await prisma.user.findUnique({
+      where: { phoneNumber }
+    });
+
+    if (existingUser) {
+      return res.status(409).json({ message: 'Phone number is already registered' });
+    }
+
+    return res.status(200).json({ message: 'Phone number is available' });
+  } catch (error) {
+    console.error('CHECK PHONE ERROR:', error);
+    return res.status(500).json({ message: 'Server error' });
+  }
+};
+
 export const login = async (req, res) => {
   try {
     const { phoneNumber, password } = req.body;
