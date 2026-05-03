@@ -36,12 +36,15 @@ class AuthRepository {
         otpCode: String
     ): Resource<String> {
         return try {
+            android.util.Log.d("FIREBASE_DEBUG", "Trying to verify: $verificationId with code: $otpCode")
             val credential = PhoneAuthProvider.getCredential(verificationId, otpCode)
             val result = firebaseAuth.signInWithCredential(credential).await()
+            android.util.Log.d("FIREBASE_DEBUG", "Sign in success: ${result.user?.uid}")
             val token = result.user?.getIdToken(false)?.await()?.token
                 ?: return Resource.Error("Failed to get Firebase token")
             Resource.Success(token)
         } catch (e: Exception) {
+            android.util.Log.e("FIREBASE_DEBUG", "Error: ${e.message}", e)
             Resource.Error(e.message ?: "OTP verification failed")
         }
     }

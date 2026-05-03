@@ -7,7 +7,7 @@ import {
 
 const router = express.Router();
 
-router.post('/register', startRegister);
+router.post('/start-register', startRegister);
 router.post('/login', login);
 router.post('/forgot-password', forgotPassword);
 

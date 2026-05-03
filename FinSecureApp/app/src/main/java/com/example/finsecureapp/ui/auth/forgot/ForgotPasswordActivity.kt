@@ -55,6 +55,7 @@ class ForgotPasswordActivity : AppCompatActivity() {
                         binding.progressBar.visibility = View.GONE
                         val intent = Intent(this@ForgotPasswordActivity, VerifyOtpActivity::class.java)
                         intent.putExtra("mode", "forgot")
+                        intent.putExtra("verificationId", viewModel.verificationId) // добавить
                         startActivity(intent)
                     }
                     is Resource.Error -> {

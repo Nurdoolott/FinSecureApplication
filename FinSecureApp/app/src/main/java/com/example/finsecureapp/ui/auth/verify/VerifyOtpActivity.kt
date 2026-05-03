@@ -29,7 +29,12 @@ class VerifyOtpActivity : AppCompatActivity() {
 
         mode = intent.getStringExtra("mode") ?: "register"
 
-        // Показываем поле нового пароля только при сбросе
+        // Получаем все данные из Intent
+        val verificationId = intent.getStringExtra("verificationId")
+        val fullName = intent.getStringExtra("fullName")
+        val password = intent.getStringExtra("password")
+        val email = intent.getStringExtra("email")
+
         if (mode == "forgot") {
             binding.layoutNewPassword.visibility = View.VISIBLE
         }
@@ -38,6 +43,12 @@ class VerifyOtpActivity : AppCompatActivity() {
             this,
             AuthViewModelFactory(AuthRepository(), TokenManager(applicationContext))
         )[AuthViewModel::class.java]
+
+        // Устанавливаем данные в ViewModel
+        viewModel.verificationId = verificationId
+        viewModel.pendingFullName = fullName
+        viewModel.pendingPassword = password
+        viewModel.pendingEmail = email
 
         binding.btnVerifyOtp.setOnClickListener {
             val otpCode = binding.etOtpCode.text.toString().trim()
@@ -49,9 +60,9 @@ class VerifyOtpActivity : AppCompatActivity() {
             if (mode == "register") {
                 viewModel.verifyOtpAndRegister(
                     otpCode = otpCode,
-                    fullName = viewModel.pendingFullName ?: "",
-                    password = viewModel.pendingPassword ?: "",
-                    email = viewModel.pendingEmail
+                    fullName = fullName ?: "",
+                    password = password ?: "",
+                    email = email
                 )
             } else {
                 val newPassword = binding.etNewPassword.text.toString().trim()
@@ -59,11 +70,7 @@ class VerifyOtpActivity : AppCompatActivity() {
                     Toast.makeText(this, "Enter new password", Toast.LENGTH_SHORT).show()
                     return@setOnClickListener
                 }
-                viewModel.pendingNewPassword = newPassword
-                viewModel.verifyOtpAndResetPassword(
-                    otpCode = otpCode,
-                    newPassword = newPassword
-                )
+                viewModel.verifyOtpAndResetPassword(otpCode, newPassword)
             }
         }
 

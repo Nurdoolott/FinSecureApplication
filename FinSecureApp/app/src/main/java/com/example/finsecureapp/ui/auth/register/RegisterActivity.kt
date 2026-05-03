@@ -68,9 +68,12 @@ class RegisterActivity : AppCompatActivity() {
                     is Resource.Loading -> binding.progressBar.visibility = View.VISIBLE
                     is Resource.Success -> {
                         binding.progressBar.visibility = View.GONE
-                        Toast.makeText(this@RegisterActivity, "OTP sent!", Toast.LENGTH_SHORT).show()
                         val intent = Intent(this@RegisterActivity, VerifyOtpActivity::class.java)
                         intent.putExtra("mode", "register")
+                        intent.putExtra("verificationId", viewModel.verificationId) // добавить
+                        intent.putExtra("fullName", viewModel.pendingFullName)
+                        intent.putExtra("password", viewModel.pendingPassword)
+                        intent.putExtra("email", viewModel.pendingEmail)
                         startActivity(intent)
                     }
                     is Resource.Error -> {
