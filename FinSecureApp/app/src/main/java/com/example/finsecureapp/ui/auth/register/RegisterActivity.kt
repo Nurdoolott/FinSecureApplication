@@ -2,6 +2,7 @@ package com.example.finsecureapp.ui.auth.register
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
@@ -28,24 +29,28 @@ class RegisterActivity : AppCompatActivity() {
 
         viewModel = ViewModelProvider(
             this,
-            AuthViewModelFactory(
-                AuthRepository(),
-                TokenManager(applicationContext)
-            )
+            AuthViewModelFactory(AuthRepository(), TokenManager(applicationContext))
         )[AuthViewModel::class.java]
 
         binding.btnRegister.setOnClickListener {
             val fullName = binding.etFullName.text.toString().trim()
             val phoneNumber = binding.etPhoneNumber.text.toString().trim()
             val password = binding.etPassword.text.toString().trim()
-            val emailText = binding.etEmail.text.toString().trim()
-            val email = if (emailText.isEmpty()) null else emailText
+            val email = binding.etEmail.text.toString().trim().ifEmpty { null }
 
             if (fullName.isEmpty() || phoneNumber.isEmpty() || password.isEmpty()) {
                 Toast.makeText(this, "Please fill required fields", Toast.LENGTH_SHORT).show()
-            } else {
-                viewModel.startRegister(fullName, phoneNumber, password, email)
+                return@setOnClickListener
             }
+
+            // Сохраняем данные и отправляем OTP через Firebase
+            viewModel.sendOtp(phoneNumber, this)
+
+            // Сохраняем данные для передачи в VerifyOtpActivity
+            viewModel.pendingFullName = fullName
+            viewModel.pendingPassword = password
+            viewModel.pendingEmail = email
+            viewModel.pendingPhone = phoneNumber
         }
 
         binding.tvGoToLogin.setOnClickListener {
@@ -53,31 +58,25 @@ class RegisterActivity : AppCompatActivity() {
             finish()
         }
 
-        observeRegister()
+        observeOtpSent()
     }
 
-    private fun observeRegister() {
+    private fun observeOtpSent() {
         lifecycleScope.launch {
-            viewModel.startRegisterState.collect { state ->
+            viewModel.otpSentState.collect { state ->
                 when (state) {
-                    is Resource.Loading -> {
-                        binding.progressBar.visibility = android.view.View.VISIBLE
-                    }
-
+                    is Resource.Loading -> binding.progressBar.visibility = View.VISIBLE
                     is Resource.Success -> {
-                        binding.progressBar.visibility = android.view.View.GONE
-                        Toast.makeText(this@RegisterActivity, state.data.message, Toast.LENGTH_SHORT).show()
-
+                        binding.progressBar.visibility = View.GONE
+                        Toast.makeText(this@RegisterActivity, "OTP sent!", Toast.LENGTH_SHORT).show()
                         val intent = Intent(this@RegisterActivity, VerifyOtpActivity::class.java)
-                        intent.putExtra("pendingRegistrationId", state.data.pendingRegistrationId)
+                        intent.putExtra("mode", "register")
                         startActivity(intent)
                     }
-
                     is Resource.Error -> {
-                        binding.progressBar.visibility = android.view.View.GONE
+                        binding.progressBar.visibility = View.GONE
                         Toast.makeText(this@RegisterActivity, state.message, Toast.LENGTH_LONG).show()
                     }
-
                     null -> Unit
                 }
             }

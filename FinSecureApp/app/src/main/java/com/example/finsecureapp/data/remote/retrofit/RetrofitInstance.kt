@@ -12,7 +12,8 @@ import com.example.finsecureapp.data.remote.api.UserApi
 
 object RetrofitInstance {
 
-    private const val BASE_URL = "http://172.20.10.2:5000/"
+    private const val BASE_URL = "https://finsecureapplicationnn.onrender.com/"
+
 
     private val loggingInterceptor = HttpLoggingInterceptor().apply {
         level = HttpLoggingInterceptor.Level.BODY

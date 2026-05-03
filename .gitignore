@@ -9,3 +9,8 @@ server/node_modules/
 # android
 .idea/
 *.iml
+
+serviceAccountKey.json
+
+finapp-626a3-firebase-adminsdk-fbsvc-65d4543434.json
+serviceAccountKey.json

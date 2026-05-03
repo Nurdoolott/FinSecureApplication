@@ -2,6 +2,7 @@ package com.example.finsecureapp.ui.auth.verify
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
@@ -19,56 +20,92 @@ class VerifyOtpActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityVerifyOtpBinding
     private lateinit var viewModel: AuthViewModel
-    private lateinit var pendingRegistrationId: String
+    private var mode: String = "register" // "register" или "forgot"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityVerifyOtpBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        pendingRegistrationId = intent.getStringExtra("pendingRegistrationId").orEmpty()
+        mode = intent.getStringExtra("mode") ?: "register"
+
+        // Показываем поле нового пароля только при сбросе
+        if (mode == "forgot") {
+            binding.layoutNewPassword.visibility = View.VISIBLE
+        }
 
         viewModel = ViewModelProvider(
             this,
-            AuthViewModelFactory(
-                AuthRepository(),
-                TokenManager(applicationContext)
-            )
+            AuthViewModelFactory(AuthRepository(), TokenManager(applicationContext))
         )[AuthViewModel::class.java]
 
         binding.btnVerifyOtp.setOnClickListener {
             val otpCode = binding.etOtpCode.text.toString().trim()
-
             if (otpCode.isEmpty()) {
                 Toast.makeText(this, "Enter OTP code", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            if (mode == "register") {
+                viewModel.verifyOtpAndRegister(
+                    otpCode = otpCode,
+                    fullName = viewModel.pendingFullName ?: "",
+                    password = viewModel.pendingPassword ?: "",
+                    email = viewModel.pendingEmail
+                )
             } else {
-                viewModel.verifyRegister(pendingRegistrationId, otpCode)
+                val newPassword = binding.etNewPassword.text.toString().trim()
+                if (newPassword.isEmpty()) {
+                    Toast.makeText(this, "Enter new password", Toast.LENGTH_SHORT).show()
+                    return@setOnClickListener
+                }
+                viewModel.pendingNewPassword = newPassword
+                viewModel.verifyOtpAndResetPassword(
+                    otpCode = otpCode,
+                    newPassword = newPassword
+                )
             }
         }
 
-        observeVerifyOtp()
+        if (mode == "register") observeRegister() else observeResetPassword()
     }
 
-    private fun observeVerifyOtp() {
+    private fun observeRegister() {
         lifecycleScope.launch {
-            viewModel.verifyRegisterState.collect { state ->
+            viewModel.registerState.collect { state ->
                 when (state) {
-                    is Resource.Loading -> {
-                        binding.progressBar.visibility = android.view.View.VISIBLE
-                    }
-
+                    is Resource.Loading -> binding.progressBar.visibility = View.VISIBLE
                     is Resource.Success -> {
-                        binding.progressBar.visibility = android.view.View.GONE
+                        binding.progressBar.visibility = View.GONE
                         Toast.makeText(this@VerifyOtpActivity, state.data.message, Toast.LENGTH_SHORT).show()
                         startActivity(Intent(this@VerifyOtpActivity, LoginActivity::class.java))
                         finishAffinity()
                     }
-
                     is Resource.Error -> {
-                        binding.progressBar.visibility = android.view.View.GONE
+                        binding.progressBar.visibility = View.GONE
                         Toast.makeText(this@VerifyOtpActivity, state.message, Toast.LENGTH_LONG).show()
                     }
+                    null -> Unit
+                }
+            }
+        }
+    }
 
+    private fun observeResetPassword() {
+        lifecycleScope.launch {
+            viewModel.forgotPasswordState.collect { state ->
+                when (state) {
+                    is Resource.Loading -> binding.progressBar.visibility = View.VISIBLE
+                    is Resource.Success -> {
+                        binding.progressBar.visibility = View.GONE
+                        Toast.makeText(this@VerifyOtpActivity, state.data.message, Toast.LENGTH_SHORT).show()
+                        startActivity(Intent(this@VerifyOtpActivity, LoginActivity::class.java))
+                        finishAffinity()
+                    }
+                    is Resource.Error -> {
+                        binding.progressBar.visibility = View.GONE
+                        Toast.makeText(this@VerifyOtpActivity, state.message, Toast.LENGTH_LONG).show()
+                    }
                     null -> Unit
                 }
             }

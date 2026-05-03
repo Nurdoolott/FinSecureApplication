@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "582755522365",
+    "project_id": "finapp-626a3",
+    "storage_bucket": "finapp-626a3.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:582755522365:android:9a3497a9ab915b76fd1754",
+        "android_client_info": {
+          "package_name": "com.example.finsecureapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBUWq_yUftKtBHeEZdDpTUnWFlT0L9Igfo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

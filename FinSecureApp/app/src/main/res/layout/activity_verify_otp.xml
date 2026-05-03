@@ -36,6 +36,22 @@
                 android:inputType="number" />
         </com.google.android.material.textfield.TextInputLayout>
 
+        <!-- Показывается только при сбросе пароля -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/layoutNewPassword"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="New Password"
+            android:layout_marginBottom="16dp"
+            android:visibility="gone">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etNewPassword"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textPassword" />
+        </com.google.android.material.textfield.TextInputLayout>
+
         <Button
             android:id="@+id/btnVerifyOtp"
             android:layout_width="match_parent"
@@ -48,5 +64,6 @@
             android:layout_height="wrap_content"
             android:visibility="gone"
             android:layout_marginTop="20dp" />
+
     </LinearLayout>
 </ScrollView>

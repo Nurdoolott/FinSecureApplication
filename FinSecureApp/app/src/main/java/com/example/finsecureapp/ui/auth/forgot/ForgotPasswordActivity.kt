@@ -2,6 +2,7 @@ package com.example.finsecureapp.ui.auth.forgot
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
@@ -9,7 +10,7 @@ import androidx.lifecycle.lifecycleScope
 import com.example.finsecureapp.data.local.datastore.TokenManager
 import com.example.finsecureapp.data.repository.AuthRepository
 import com.example.finsecureapp.databinding.ActivityForgotPasswordBinding
-import com.example.finsecureapp.ui.auth.reset.ResetPasswordActivity
+import com.example.finsecureapp.ui.auth.verify.VerifyOtpActivity
 import com.example.finsecureapp.utils.Resource
 import com.example.finsecureapp.viewmodel.AuthViewModel
 import com.example.finsecureapp.viewmodel.AuthViewModelFactory
@@ -27,10 +28,7 @@ class ForgotPasswordActivity : AppCompatActivity() {
 
         viewModel = ViewModelProvider(
             this,
-            AuthViewModelFactory(
-                AuthRepository(),
-                TokenManager(applicationContext)
-            )
+            AuthViewModelFactory(AuthRepository(), TokenManager(applicationContext))
         )[AuthViewModel::class.java]
 
         binding.btnSendOtp.setOnClickListener {
@@ -38,36 +36,31 @@ class ForgotPasswordActivity : AppCompatActivity() {
 
             if (phoneNumber.isEmpty()) {
                 Toast.makeText(this, "Enter phone number", Toast.LENGTH_SHORT).show()
-            } else {
-                viewModel.forgotPassword(phoneNumber)
+                return@setOnClickListener
             }
+
+            viewModel.pendingPhone = phoneNumber
+            viewModel.sendOtp(phoneNumber, this)
         }
 
-        observeForgotPassword()
+        observeOtpSent()
     }
 
-    private fun observeForgotPassword() {
+    private fun observeOtpSent() {
         lifecycleScope.launch {
-            viewModel.forgotPasswordState.collect { state ->
+            viewModel.otpSentState.collect { state ->
                 when (state) {
-                    is Resource.Loading -> {
-                        binding.progressBar.visibility = android.view.View.VISIBLE
-                    }
-
+                    is Resource.Loading -> binding.progressBar.visibility = View.VISIBLE
                     is Resource.Success -> {
-                        binding.progressBar.visibility = android.view.View.GONE
-                        Toast.makeText(this@ForgotPasswordActivity, state.data.message, Toast.LENGTH_SHORT).show()
-
-                        val intent = Intent(this@ForgotPasswordActivity, ResetPasswordActivity::class.java)
-                        intent.putExtra("pendingResetId", state.data.pendingResetId)
+                        binding.progressBar.visibility = View.GONE
+                        val intent = Intent(this@ForgotPasswordActivity, VerifyOtpActivity::class.java)
+                        intent.putExtra("mode", "forgot")
                         startActivity(intent)
                     }
-
                     is Resource.Error -> {
-                        binding.progressBar.visibility = android.view.View.GONE
+                        binding.progressBar.visibility = View.GONE
                         Toast.makeText(this@ForgotPasswordActivity, state.message, Toast.LENGTH_LONG).show()
                     }
-
                     null -> Unit
                 }
             }

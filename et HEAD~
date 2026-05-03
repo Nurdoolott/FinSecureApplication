@@ -1,0 +1,9 @@
+[33m578a0f8[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmaster[m[33m)[m replace twilio with firebase
+[33m383e3e4[m[33m ([m[1;31morigin/master[m[33m)[m fix: remove node_modules from repository
+[33m9cc203b[m fix: remove prisma postinstall
+[33m5f8154d[m fix: remove secrets and add gitignore
+[33m39cfbbe[m prepare backend for render deployment
+[33ma874120[m Merge branch 'master' of https://github.com/Nurdoolott/FinSecureApplication # Please enter a commit message to explain why this merge is necessary, # especially if it merges an updated upstream into a topic branch. # # Lines starting with '#' will be ignored, and an empty message aborts # the commit.
+[33m64dd2e8[m fix: add FinSecureApp as regular folder
+[33m4b42647[m README
+[33m74c6d91[m integrating front
